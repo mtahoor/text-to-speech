@@ -16,6 +16,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import gtts
 import playsound
+from tkinter import ttk
 
 
 offset = 29
@@ -62,13 +63,6 @@ class Application:
         self.T.place(x=60, y=5)
         self.T.config(text="Sign Language To Text Conversion", font=("Times New Roman", 30, "bold"))
 
-        # image1 = Image.open("/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/A.jpeg")
-        # image1 = image1.resize((200, 200), Image.LANCZOS)
-        # test = ImageTk.PhotoImage(image1)
-        # label1 = tk.Label(image=test)
-        # label1.image = test
-        # label1.place(x=1000, y=110)
-
 
         self.panel3 = tk.Label(self.root)  # Current Symbol
         self.panel3.place(x=280, y=585)
@@ -79,6 +73,7 @@ class Application:
 
         self.panel5 = tk.Label(self.root)  # Sentence
         self.panel5.place(x=260, y=632)
+
 
         self.T3 = tk.Label(self.root)
         self.T3.place(x=10, y=632)
@@ -118,9 +113,14 @@ class Application:
         self.word2 = " "
         self.word3 = " "
         self.word4 = " "
+        options = ["Australian", "British", "Indian"]
+        self.dropdown = ttk.Combobox(self.root, values=options, state="readonly")
+        self.dropdown.current(0)
+        self.dropdown.place(x=1000, y=50)
 
         self.video_loop()
 
+    
     def video_loop(self):
         try:
             ok, frame = self.vs.read()
@@ -139,7 +139,7 @@ class Application:
                 x, y, w, h = hand['bbox']
                 image = cv2image_copy[y - offset:y + h + offset, x - offset:x + w + offset]
 
-                white = cv2.imread("/Users/macbook/Downloads/gestures to speech/white.jpg")
+                white = cv2.imread("./white.jpg")
                 # img_final=img_final1=img_final2=0
 
                 handz = hd2.findHands(image, draw=False, flipType=True)
@@ -193,7 +193,8 @@ class Application:
 
                     self.panel3.config(text=self.current_symbol, font=("Times New Roman", 30))
 
-                    image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.current_symbol}.jpg"
+
+                    image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.dropdown.get()}/{self.current_symbol}.jpg"
                     image1 = Image.open(image_path)
                     image1 = image1.resize((200, 200), Image.LANCZOS)
                     test = ImageTk.PhotoImage(image1)
@@ -201,7 +202,6 @@ class Application:
                     label1.image = test
                     label1.place(x=1000, y=110)
 
-                    #self.panel4.config(text=self.word, font=("Times New Roman", 30))
 
 
 
