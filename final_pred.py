@@ -51,7 +51,7 @@ class Application:
         self.root = tk.Tk()
         self.root.title("Sign Language To Text Conversion")
         self.root.protocol('WM_DELETE_WINDOW', self.destructor)
-        self.root.geometry("1300x700")
+        self.root.geometry("1300x780")
 
         self.panel = tk.Label(self.root)
         self.panel.place(x=40, y=3, width=480, height=640)
@@ -65,35 +65,35 @@ class Application:
 
 
         self.panel3 = tk.Label(self.root)  # Current Symbol
-        self.panel3.place(x=280, y=585)
+        self.panel3.place(x=280, y=645)
 
         self.T1 = tk.Label(self.root)
-        self.T1.place(x=10, y=580)
+        self.T1.place(x=10, y=645)
         self.T1.config(text="Character :", font=("Times New Roman", 30, "bold"))
 
         self.panel5 = tk.Label(self.root)  # Sentence
-        self.panel5.place(x=260, y=632)
+        self.panel5.place(x=260, y=688)
 
 
         self.T3 = tk.Label(self.root)
-        self.T3.place(x=10, y=632)
+        self.T3.place(x=10, y=688)
         self.T3.config(text="Sentence :", font=("Times New Roman", 30, "bold"))
 
         self.T4 = tk.Label(self.root)
-        self.T4.place(x=10, y=700)
+        self.T4.place(x=10, y=720)
         self.T4.config(text="Suggestions :", fg="red", font=("Times New Roman", 30, "bold"))
 
         self.b1 = tk.Button(self.root)
-        self.b1.place(x=390, y=700)
+        self.b1.place(x=390, y=720)
 
         self.b2 = tk.Button(self.root)
-        self.b2.place(x=590, y=700)
+        self.b2.place(x=590, y=720)
 
         self.b3 = tk.Button(self.root)
-        self.b3.place(x=790, y=700)
+        self.b3.place(x=790, y=720)
 
         self.b4 = tk.Button(self.root)
-        self.b4.place(x=990, y=700)
+        self.b4.place(x=990, y=720)
 
         self.clear = tk.Button(self.root)
         self.clear.place(x=1205, y=630)
