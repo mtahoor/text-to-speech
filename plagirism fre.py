@@ -10,8 +10,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import enchant
 ddd=enchant.Dict("en-US")
-hd = HandDetector(maxHands=1)
-hd2 = HandDetector(maxHands=1)
+hand_detector_1 = HandDetector(maxHands=1)
+hand_detector_2 = HandDetector(maxHands=1)
 import tkinter as tk
 from PIL import Image, ImageTk
 import gtts
@@ -19,13 +19,13 @@ import playsound
 from tkinter import ttk
 
 
-offset = 29
+OFFSET = 29
 
 os.environ["THEANO_FLAGS"] = "device=cuda, assert_no_cpu_op=True"
 
 
 
-class Application:
+class SignLanguageApp:
 
     def __init__(self):
         # Constructor for initializing the SignLanguageToTextConverter class.
@@ -37,12 +37,12 @@ class Application:
         # - Configures various GUI elements such as labels, buttons, and dropdown menus.
         # - Initializes variables for managing text conversion, speech synthesis, and UI updates.
        
-        self.vs = cv2.VideoCapture(0)
+        self.video_stream = cv2.VideoCapture(0)
         self.current_image = None
         self.model = load_model('/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/cnn8grps_rad1_model.h5')
 
-        self.ct = {}
-        self.ct['blank'] = 0
+        self.character_count = {}
+        self.character_count['blank'] = 0
         self.blank_flag = 0
         self.space_flag = False
         self.next_flag = True
@@ -53,13 +53,13 @@ class Application:
             self.ten_prev_char.append(" ")
 
         for i in ascii_uppercase:
-            self.ct[i] = 0
+            self.character_count[i] = 0
 
         print("Loaded model from disk")
 
         self.root = tk.Tk()
         self.root.title("Sign Language To Text Conversion")
-        self.root.protocol('WM_DELETE_WINDOW', self.destructor)
+        self.root.protocol('WM_DELETE_WINDOW', self.close_app)
         self.root.geometry("1300x780")
 
         self.panel = tk.Label(self.root)
@@ -92,36 +92,36 @@ class Application:
         self.T4.place(x=10, y=720)
         self.T4.config(text="Suggestions :", fg="red", font=("Times New Roman", 30, "bold"))
 
-        self.b1 = tk.Button(self.root)
-        self.b1.place(x=390, y=720)
+        self.button1 = tk.Button(self.root)
+        self.button1.place(x=390, y=720)
 
-        self.b2 = tk.Button(self.root)
-        self.b2.place(x=590, y=720)
+        self.button2 = tk.Button(self.root)
+        self.button2.place(x=590, y=720)
 
-        self.b3 = tk.Button(self.root)
-        self.b3.place(x=790, y=720)
+        self.button3 = tk.Button(self.root)
+        self.button3.place(x=790, y=720)
 
-        self.b4 = tk.Button(self.root)
-        self.b4.place(x=990, y=720)
+        self.button4 = tk.Button(self.root)
+        self.button4.place(x=990, y=720)
 
         self.clear = tk.Button(self.root)
         self.clear.place(x=1205, y=630)
-        self.clear.config(text="Clear", font=("Times New Roman", 20), wraplength=100, command=self.clear_fun)
+        self.clear.config(text="Clear", font=("Times New Roman", 20), wraplength=100, command=self.clear_interface)
 
         self.speak = tk.Button(self.root)
         self.speak.place(x=1105, y=630)
-        self.speak.config(text="Speak", font=("Times New Roman", 20), wraplength=100, command=self.speak_fun)
+        self.speak.config(text="Speak", font=("Times New Roman", 20), wraplength=100, command=self.speak_text)
 
-        self.str = " "
-        self.ccc = 0
-        self.word = " "
-        self.current_symbol = "C"
+        self.current_sentence = " "
+        self.counter = 0
+        self.current_word = " "
+        self.current_character = "C"
         self.photo = "Empty"
 
-        self.word1 = " "
-        self.word2 = " "
-        self.word3 = " "
-        self.word4 = " "
+        self.suggested_word_1 = " "
+        self.suggested_word_2 = " "
+        self.suggested_word_3 = " "
+        self.suggested_word_4 = " "
         options = ["Australian", "British", "Indian"]
         self.dropdown = ttk.Combobox(self.root, values=options, state="readonly")
         self.dropdown.current(0)
@@ -144,9 +144,9 @@ class Application:
         # - Calls itself recursively to maintain real-time video processing.
     
         try:
-            ok, frame = self.vs.read()
+            ok, frame = self.video_stream.read()
             cv2image = cv2.flip(frame, 1)
-            hands = hd.findHands(cv2image, draw=False, flipType=True)
+            hands = hand_detector_1.findHands(cv2image, draw=False, flipType=True)
             cv2image_copy=np.array(cv2image)
             cv2image = cv2.cvtColor(cv2image, cv2.COLOR_BGR2RGB)
             self.current_image = Image.fromarray(cv2image)
@@ -155,22 +155,18 @@ class Application:
             self.panel.config(image=imgtk)
 
             if hands:
-                # #print(" --------- lmlist=",hands[1])
                 hand = hands[0]
                 x, y, w, h = hand['bbox']
-                image = cv2image_copy[y - offset:y + h + offset, x - offset:x + w + offset]
+                image = cv2image_copy[y - OFFSET:y + h + OFFSET, x - OFFSET:x + w + OFFSET]
 
                 white = cv2.imread("./white.jpg")
-                # img_final=img_final1=img_final2=0
 
-                handz = hd2.findHands(image, draw=False, flipType=True)
-                print(" ", self.ccc)
-                self.ccc += 1
+                handz = hand_detector_2.findHands(image, draw=False, flipType=True)
+                print(" ", self.counter)
+                self.counter += 1
                 if handz:
                     hand = handz[0]
                     self.pts = hand['lmList']
-                    # x1,y1,w1,h1=hand['bbox']
-
                     os = ((400 - w) // 2) - 15
                     os1 = ((400 - h) // 2) - 15
                     for t in range(0, 4, 1):
@@ -212,32 +208,20 @@ class Application:
                     self.panel2.imgtk = imgtk
                     self.panel2.config(image=imgtk)
 
-                    self.panel3.config(text=self.current_symbol, font=("Times New Roman", 30))
+                    self.panel3.config(text=self.current_character, font=("Times New Roman", 30))
 
+                    self.button1.config(text=self.suggested_word_1, font=("Times New Roman", 20), wraplength=825, command=self.action1)
+                    self.button2.config(text=self.suggested_word_2, font=("Times New Roman", 20), wraplength=825,  command=self.action2)
+                    self.button3.config(text=self.suggested_word_3, font=("Times New Roman", 20), wraplength=825,  command=self.action3)
+                    self.button4.config(text=self.suggested_word_4, font=("Times New Roman", 20), wraplength=825,  command=self.action4)
 
-                    # image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.dropdown.get()}/{self.current_symbol}.jpg"
-                    # image1 = Image.open(image_path)
-                    # image1 = image1.resize((200, 200), Image.LANCZOS)
-                    # test = ImageTk.PhotoImage(image1)
-                    # label1 = tk.Label(image=test)
-                    # label1.image = test
-                    # label1.place(x=1000, y=110)
-
-
-
-
-                    self.b1.config(text=self.word1, font=("Times New Roman", 20), wraplength=825, command=self.action1)
-                    self.b2.config(text=self.word2, font=("Times New Roman", 20), wraplength=825,  command=self.action2)
-                    self.b3.config(text=self.word3, font=("Times New Roman", 20), wraplength=825,  command=self.action3)
-                    self.b4.config(text=self.word4, font=("Times New Roman", 20), wraplength=825,  command=self.action4)
-
-            self.panel5.config(text=self.str, font=("Times New Roman", 30), wraplength=1025)
+            self.panel5.config(text=self.self.current_sentence, font=("Times New Roman", 30), wraplength=1025)
         except Exception:
             print("==", traceback.format_exc())
         finally:
             self.root.after(1, self.video_loop)
 
-    def distance(self,x,y):
+    def calculate_distance(self,x,y):
         # Calculates the Euclidean distance between two points in 2D space.
         # 
         # - Receives two points (x and y) as input.
@@ -246,7 +230,7 @@ class Application:
         # 
         return math.sqrt(((x[0] - y[0]) ** 2) + ((x[1] - y[1]) ** 2))
 
-    def clear_fun(self):
+    def clear_interface(self):
         # Resets various attributes and UI elements to their initial states for clearing the interface.
         # 
         # - Resets the string representation of the sentence and related variables.
@@ -256,19 +240,19 @@ class Application:
         # - Resets word suggestions to empty strings.
         # - Clears the display panel for the current symbol and sentence.
 
-        self.str = " "
-        self.ccc = 0
-        self.word = " "
-        self.current_symbol = "C"
+        self.self.current_sentence = " "
+        self.counter = 0
+        self.current_word = " "
+        self.current_character = "C"
         self.photo = "Empty"
-        self.word1 = " "
-        self.word2 = " "
-        self.word3 = " "
-        self.word4 = " "
+        self.suggested_word_1 = " "
+        self.suggested_word_2 = " "
+        self.suggested_word_3 = " "
+        self.suggested_word_4 = " "
         self.panel3.config(text=" ", font=("Courier", 50))
         self.panel5.config(text=" ", font=("Courier", 50))
 
-    def destructor(self):
+    def close_app(self):
         # Destroys the application, releasing resources and closing windows.
         # 
         # - Prints a closing message to the console.
@@ -278,8 +262,10 @@ class Application:
         
         print("Closing Application...")
         self.root.destroy()
-        self.vs.release()
+        self.video_stream.release()
         cv2.destroyAllWindows()
+
+
 
     def predict(self, test_image):
         # The "test image" refers to the frame captured by the camera, containing the vertices of the hand. It provides us with an image of the hand, as depicted in the central section of the gui.
@@ -338,7 +324,7 @@ class Application:
         l = [[6, 0], [6, 6], [6, 2]]
         pl = [ch1, ch2]
         if pl in l:
-            if self.distance(self.pts[8], self.pts[16]) < 52:
+            if self.calculate_distance(self.pts[8], self.pts[16]) < 52:
                 ch1 = 2
                 # print("22222")
 
@@ -375,7 +361,7 @@ class Application:
         l = [[6, 4], [6, 1], [6, 2]]
         pl = [ch1, ch2]
         if pl in l:
-            if self.distance(self.pts[4], self.pts[11]) > 55:
+            if self.calculate_distance(self.pts[4], self.pts[11]) > 55:
                 ch1 = 4
                 # print("44444")
 
@@ -383,7 +369,7 @@ class Application:
         l = [[1, 4], [1, 6], [1, 1]]
         pl = [ch1, ch2]
         if pl in l:
-            if (self.distance(self.pts[4], self.pts[11]) > 50) and (
+            if (self.calculate_distance(self.pts[4], self.pts[11]) > 50) and (
                     self.pts[6][1] > self.pts[8][1] and self.pts[10][1] < self.pts[12][1] and self.pts[14][1] < self.pts[16][1] and self.pts[18][1] <
                     self.pts[20][1]):
                 ch1 = 4
@@ -493,7 +479,7 @@ class Application:
         l = [[2, 1], [2, 2], [2, 6], [2, 7], [2, 0]]
         pl = [ch1, ch2]
         if pl in l:
-            if self.distance(self.pts[8], self.pts[16]) > 50:
+            if self.calculate_distance(self.pts[8], self.pts[16]) > 50:
                 ch1 = 6
                 print("666663")
 
@@ -502,7 +488,7 @@ class Application:
         l = [[4, 6], [4, 2], [4, 1], [4, 4]]
         pl = [ch1, ch2]
         if pl in l:
-            if self.distance(self.pts[4], self.pts[11]) < 60:
+            if self.calculate_distance(self.pts[4], self.pts[11]) < 60:
                 ch1 = 6
                 print("666664")
 
@@ -556,7 +542,7 @@ class Application:
         l = [[4, 1], [4, 2], [4, 4]]
         pl = [ch1, ch2]
         if pl in l:
-            if (self.distance(self.pts[4], self.pts[11]) < 50) and (
+            if (self.calculate_distance(self.pts[4], self.pts[11]) < 50) and (
                     self.pts[6][1] > self.pts[8][1] and self.pts[10][1] < self.pts[12][1] and self.pts[14][1] < self.pts[16][1] and self.pts[18][1] <
                     self.pts[20][1]):
                 ch1 = 1
@@ -613,7 +599,7 @@ class Application:
             if not (self.pts[0][0] + fg < self.pts[8][0] and self.pts[0][0] + fg < self.pts[12][0] and self.pts[0][0] + fg < self.pts[16][0] and
                     self.pts[0][0] + fg < self.pts[20][0]) and not (
                     self.pts[0][0] > self.pts[8][0] and self.pts[0][0] > self.pts[12][0] and self.pts[0][0] > self.pts[16][0] and self.pts[0][0] > self.pts[20][
-                0]) and self.distance(self.pts[4], self.pts[11]) < 50:
+                0]) and self.calculate_distance(self.pts[4], self.pts[11]) < 50:
                 ch1 = 1
                 print("111116")
 
@@ -653,19 +639,19 @@ class Application:
                 ch1 = 'N'
 
         if ch1 == 2:
-            if self.distance(self.pts[12], self.pts[4]) > 42:
+            if self.calculate_distance(self.pts[12], self.pts[4]) > 42:
                 ch1 = 'C'
             else:
                 ch1 = 'O'
 
         if ch1 == 3:
-            if (self.distance(self.pts[8], self.pts[12])) > 72:
+            if (self.calculate_distance(self.pts[8], self.pts[12])) > 72:
                 ch1 = 'G'
             else:
                 ch1 = 'H'
 
         if ch1 == 7:
-            if self.distance(self.pts[8], self.pts[4]) > 42:
+            if self.calculate_distance(self.pts[8], self.pts[4]) > 42:
                 ch1 = 'Y'
             else:
                 ch1 = 'J'
@@ -704,11 +690,11 @@ class Application:
             if (self.pts[6][1] > self.pts[8][1] and self.pts[10][1] > self.pts[12][1] and self.pts[14][1] < self.pts[16][1] and self.pts[18][1] < self.pts[20][
                 1]) and self.pts[4][1] < self.pts[9][1]:
                 ch1 = 'K'
-            if ((self.distance(self.pts[8], self.pts[12]) - self.distance(self.pts[6], self.pts[10])) < 8) and (
+            if ((self.calculate_distance(self.pts[8], self.pts[12]) - self.calculate_distance(self.pts[6], self.pts[10])) < 8) and (
                     self.pts[6][1] > self.pts[8][1] and self.pts[10][1] > self.pts[12][1] and self.pts[14][1] < self.pts[16][1] and self.pts[18][1] <
                     self.pts[20][1]):
                 ch1 = 'U'
-            if ((self.distance(self.pts[8], self.pts[12]) - self.distance(self.pts[6], self.pts[10])) >= 8) and (
+            if ((self.calculate_distance(self.pts[8], self.pts[12]) - self.calculate_distance(self.pts[6], self.pts[10])) >= 8) and (
                     self.pts[6][1] > self.pts[8][1] and self.pts[10][1] > self.pts[12][1] and self.pts[14][1] < self.pts[16][1] and self.pts[18][1] <
                     self.pts[20][1]) and (self.pts[4][1] > self.pts[9][1]):
                 ch1 = 'V'
@@ -738,23 +724,23 @@ class Application:
         if ch1=="next" and self.prev_char!="next":
             if self.ten_prev_char[(self.count-2)%10]!="next":
                 if self.ten_prev_char[(self.count-2)%10]=="Backspace":
-                    self.str=self.str[0:-1]
+                    self.current_sentence=self.current_sentence[0:-1]
                 else:
                     if self.ten_prev_char[(self.count - 2) % 10] != "Backspace":
-                        self.str = self.str + self.ten_prev_char[(self.count-2)%10]
+                        self.current_sentence = self.current_sentence + self.ten_prev_char[(self.count-2)%10]
             else:
                 if self.ten_prev_char[(self.count - 0) % 10] != "Backspace":
-                    self.str = self.str + self.ten_prev_char[(self.count - 0) % 10]
+                    self.current_sentence = self.current_sentence + self.ten_prev_char[(self.count - 0) % 10]
 
         # Check if ch1 is a space character and the previous character is not a space
         if ch1 == " " and self.prev_char != " ":
             # If conditions met, add a space to the string
-            self.str = self.str + " "
+            self.current_sentence = self.current_sentence + " "
 
         # Update the previous character with the current character
         self.prev_char = ch1
         # Update the current symbol with the current character
-        self.current_symbol = ch1
+        self.current_character = ch1
         # Increment the count to keep track of characters processed
         self.count += 1
         # Update the circular buffer storing the ten previous characters
@@ -762,14 +748,14 @@ class Application:
 
 
         # Check if the string contains any non-space characters
-        if len(self.str.strip()) != 0:
+        if len(self.current_sentence.strip()) != 0:
             # Find the index of the last space character
-            st = self.str.rfind(" ")
+            st = self.current_sentence.rfind(" ")
             # Get the substring after the last space character
-            ed = len(self.str)
-            word = self.str[st + 1:ed]
+            ed = len(self.current_sentence)
+            word = self.current_sentence[st + 1:ed]
             # Store the extracted word
-            self.word = word
+            self.current_word = word
             print("----------word = ", word)
             # If the extracted word contains non-space characters
             if len(word.strip()) != 0:
@@ -778,22 +764,22 @@ class Application:
                 lenn = len(ddd.suggest(word))
                 # Store up to four suggestions if available
                 if lenn >= 4:
-                    self.word4 = ddd.suggest(word)[3]
+                    self.suggested_word_4 = ddd.suggest(word)[3]
 
                 if lenn >= 3:
-                    self.word3 = ddd.suggest(word)[2]
+                    self.suggested_word_3 = ddd.suggest(word)[2]
 
                 if lenn >= 2:
-                    self.word2 = ddd.suggest(word)[1]
+                    self.suggested_word_2 = ddd.suggest(word)[1]
 
                 if lenn >= 1:
-                    self.word1 = ddd.suggest(word)[0]
+                    self.suggested_word_1 = ddd.suggest(word)[0]
             # If the extracted word is empty, set suggestions to empty strings
             else:
-                self.word1 = " "
-                self.word2 = " "
-                self.word3 = " "
-                self.word4 = " "
+                self.suggested_word_1 = " "
+                self.suggested_word_2 = " "
+                self.suggested_word_3 = " "
+                self.suggested_word_4 = " "
 
         # Initialize the HandDetector object with specified parameters
         hd = HandDetector(detectionCon=0.7, maxHands=1)
@@ -802,50 +788,51 @@ class Application:
 
     def action1(self):
         # Find the index of the last space in the string
-        idx_space = self.str.rfind(" ")
+        idx_space = self.current_sentence.rfind(" ")
         # Find the index of the current word in the string starting from the last space
-        idx_word = self.str.find(self.word, idx_space)
+        idx_word = self.current_sentence.find(self.current_word, idx_space)
         # Get the index of the last character in the string
-        last_idx = len(self.str)
+        last_idx = len(self.current_sentence)
         # Remove the current word from the string and replace it with the first suggested word in uppercase
-        self.str = self.str[:idx_word]
-        self.str = self.str + self.word1.upper()
+        self.current_sentence = self.current_sentence[:idx_word]
+        self.current_sentence = self.current_sentence + self.suggested_word_1.upper()
 
     def action2(self):
         # Find the index of the last space in the string
-        idx_space = self.str.rfind(" ")
+        idx_space = self.current_sentence.rfind(" ")
         # Find the index of the current word in the string starting from the last space
-        idx_word = self.str.find(self.word, idx_space)
+        idx_word = self.current_sentence.find(self.current_word, idx_space)
         # Get the index of the last character in the string
-        last_idx = len(self.str)
+        last_idx = len(self.current_sentence)
         # Remove the current word from the string and replace it with the second suggested word in uppercase
-        self.str=self.str[:idx_word]
-        self.str=self.str+self.word2.upper()
+        self.current_sentence=self.current_sentence[:idx_word]
+        self.current_sentence=self.current_sentence+self.suggested_word_2.upper()
 
     def action3(self):
         # Find the index of the last space in the string
-        idx_space = self.str.rfind(" ")
+        idx_space = self.current_sentence.rfind(" ")
         # Find the index of the current word in the string starting from the last space
-        idx_word = self.str.find(self.word, idx_space)
+        idx_word = self.current_sentence.find(self.current_word, idx_space)
         # Get the index of the last character in the string
-        last_idx = len(self.str)
+        last_idx = len(self.current_sentence)
         # Remove the current word from the string and replace it with the third suggested word in uppercase
-        self.str = self.str[:idx_word]
-        self.str = self.str + self.word3.upper()
+        self.current_sentence = self.current_sentence[:idx_word]
+        self.current_sentence = self.current_sentence + self.suggested_word_3.upper()
 
     def action4(self):
         # Find the index of the last space in the string
-        idx_space = self.str.rfind(" ")
+        idx_space = self.current_sentence.rfind(" ")
         # Find the index of the current word in the string starting from the last space
-        idx_word = self.str.find(self.word, idx_space)
+        idx_word = self.current_sentence.find(self.current_word, idx_space)
         # Get the index of the last character in the string
-        last_idx = len(self.str)
+        last_idx = len(self.current_sentence)
         # Remove the current word from the string and replace it with the fourth suggested word in uppercase
-        self.str = self.str[:idx_word]
-        self.str = self.str + self.word4.upper()
+        self.current_sentence = self.current_sentence[:idx_word]
+        self.current_sentence = self.current_sentence + self.suggested_word_4.upper()
 
-    def speak_fun(self):
-        text= self.str
+
+    def speak_text(self):
+        text= self.current_sentence
         sound=gtts.gTTS(text,lang='en')
         sound.save('prediction.mp3')
         playsound.playsound('prediction.mp3')
@@ -856,6 +843,6 @@ class Application:
 
 
 
-app = Application()
+app = SignLanguageApp()
 # Start the main event loop of the tkinter application to display the GUI
 app.root.mainloop()
