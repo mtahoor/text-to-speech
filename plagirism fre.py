@@ -18,7 +18,6 @@ import gtts
 import playsound
 from tkinter import ttk
 
-
 OFFSET = 29
 
 os.environ["THEANO_FLAGS"] = "device=cuda, assert_no_cpu_op=True"
