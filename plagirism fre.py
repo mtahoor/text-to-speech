@@ -36,12 +36,12 @@ class SignLanguageApp:
         # - Configures various GUI elements such as labels, buttons, and dropdown menus.
         # - Initializes variables for managing text conversion, speech synthesis, and UI updates.
        
-        self.video_stream = cv2.VideoCapture(0)
+        self.vs = cv2.VideoCapture(0)
         self.current_image = None
         self.model = load_model('/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/cnn8grps_rad1_model.h5')
 
-        self.character_count = {}
-        self.character_count['blank'] = 0
+        self.ct = {}
+        self.ct['blank'] = 0
         self.blank_flag = 0
         self.space_flag = False
         self.next_flag = True
@@ -52,81 +52,84 @@ class SignLanguageApp:
             self.ten_prev_char.append(" ")
 
         for i in ascii_uppercase:
-            self.character_count[i] = 0
+            self.ct[i] = 0
 
         print("Loaded model from disk")
 
         self.root = tk.Tk()
-        self.root.title("Sign Language To Text Conversion")
-        self.root.protocol('WM_DELETE_WINDOW', self.close_app)
+        self.root.title("Multilingual SLR")
+        self.root.protocol('WM_DELETE_WINDOW', self.destructor)
         self.root.geometry("1300x780")
 
         self.panel = tk.Label(self.root)
-        self.panel.place(x=40, y=3, width=480, height=640)
+        self.panel.place(x=440, y=115, width=400, height=400)
 
         self.panel2 = tk.Label(self.root)  # initialize image panel
-        self.panel2.place(x=550, y=115, width=400, height=400)
+        self.panel2.place(x=25, y=115, width=400, height=400)
 
         self.T = tk.Label(self.root)
-        self.T.place(x=60, y=5)
-        self.T.config(text="Sign Language To Text Conversion", font=("Times New Roman", 30, "bold"))
+        self.T.place(x=589, y=5)
+        self.T.config(text="Multilingual SLR",bg='black',fg='#149414', font=("Times New Roman", 24, "bold"))
 
 
         self.panel3 = tk.Label(self.root)  # Current Symbol
         self.panel3.place(x=280, y=645)
+        self.panel3.config(bg='black',fg='#149414')
 
         self.T1 = tk.Label(self.root)
         self.T1.place(x=10, y=645)
-        self.T1.config(text="Character :", font=("Times New Roman", 30, "bold"))
+        self.T1.config(text="Character :", bg='black',fg='#149414',font=("Times New Roman", 30, "bold"))
 
         self.panel5 = tk.Label(self.root)  # Sentence
-        self.panel5.place(x=260, y=688)
+        self.panel5.place(x=280, y=688)
+        self.panel5.config(bg='black',fg='#149414')
 
 
         self.T3 = tk.Label(self.root)
         self.T3.place(x=10, y=688)
-        self.T3.config(text="Sentence :", font=("Times New Roman", 30, "bold"))
+        self.T3.config(text="Sentence :",bg='black',fg='#149414', font=("Times New Roman", 30, "bold"))
 
         self.T4 = tk.Label(self.root)
-        self.T4.place(x=10, y=720)
-        self.T4.config(text="Suggestions :", fg="red", font=("Times New Roman", 30, "bold"))
+        self.T4.place(x=10, y=730)
+        self.T4.config(text="Suggestions :", bg='black',fg='#149414', font=("Times New Roman", 30, "bold"))
 
-        self.button1 = tk.Button(self.root)
-        self.button1.place(x=390, y=720)
+        self.b1 = tk.Button(self.root)
+        self.b1.place(x=390, y=730)
 
-        self.button2 = tk.Button(self.root)
-        self.button2.place(x=590, y=720)
+        self.b2 = tk.Button(self.root)
+        self.b2.place(x=590, y=730)
 
-        self.button3 = tk.Button(self.root)
-        self.button3.place(x=790, y=720)
+        self.b3 = tk.Button(self.root)
+        self.b3.place(x=790, y=730)
 
-        self.button4 = tk.Button(self.root)
-        self.button4.place(x=990, y=720)
+        self.b4 = tk.Button(self.root)
+        self.b4.place(x=990, y=730)
 
         self.clear = tk.Button(self.root)
-        self.clear.place(x=1205, y=630)
-        self.clear.config(text="Clear", font=("Times New Roman", 20), wraplength=100, command=self.clear_interface)
+        self.clear.place(x=1200, y=630)
+        self.clear.config(text="Clear", font=("Times New Roman", 20,'bold'),bg='#149414', wraplength=100, command=self.clear_fun)
 
         self.speak = tk.Button(self.root)
-        self.speak.place(x=1105, y=630)
-        self.speak.config(text="Speak", font=("Times New Roman", 20), wraplength=100, command=self.speak_text)
+        self.speak.place(x=1085, y=630)
+        self.speak.config(text="Speak", font=("Times New Roman", 20,'bold'),bg='#149414', wraplength=100, command=self.speak_fun)
 
-        self.current_sentence = " "
-        self.counter = 0
-        self.current_word = " "
-        self.current_character = "C"
+        self.str = " "
+        self.ccc = 0
+        self.word = " "
+        self.current_symbol = "C"
         self.photo = "Empty"
 
-        self.suggested_word_1 = " "
-        self.suggested_word_2 = " "
-        self.suggested_word_3 = " "
-        self.suggested_word_4 = " "
+        self.word1 = " "
+        self.word2 = " "
+        self.word3 = " "
+        self.word4 = " "
         options = ["Australian", "British", "Indian"]
         self.dropdown = ttk.Combobox(self.root, values=options, state="readonly")
         self.dropdown.current(0)
         self.dropdown.place(x=1000, y=50)
 
         self.video_loop()
+
 
     
     def video_loop(self):
