@@ -211,7 +211,7 @@ class SignLanguageApp:
                     self.panel2.imgtk = imgtk
                     self.panel2.config(image=imgtk)
 
-                    image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.dropdown.get()}/{self.current_charactergit}.jpg"
+                    image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.dropdown.get()}/{self.current_character}.jpg"
                     image1 = Image.open(image_path)
                     image1 = image1.resize((200, 200), Image.LANCZOS)
                     test = ImageTk.PhotoImage(image1)
