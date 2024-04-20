@@ -57,6 +57,7 @@ class SignLanguageApp:
         print("Loaded model from disk")
 
         self.root = tk.Tk()
+        self.root.config(background='black')
         self.root.title("Multilingual SLR")
         self.root.protocol('WM_DELETE_WINDOW', self.close_app)
         self.root.geometry("1300x780")
@@ -210,6 +211,14 @@ class SignLanguageApp:
                     self.panel2.imgtk = imgtk
                     self.panel2.config(image=imgtk)
 
+                    image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.dropdown.get()}/{self.current_charactergit}.jpg"
+                    image1 = Image.open(image_path)
+                    image1 = image1.resize((200, 200), Image.LANCZOS)
+                    test = ImageTk.PhotoImage(image1)
+                    label1 = tk.Label(image=test)
+                    label1.image = test
+                    label1.place(x=1000, y=110)
+
                     self.panel3.config(text=self.current_character, font=("Times New Roman", 30))
 
                     self.button1.config(text=self.suggested_word_1, font=("Times New Roman", 20), wraplength=825, command=self.action1)
@@ -217,7 +226,7 @@ class SignLanguageApp:
                     self.button3.config(text=self.suggested_word_3, font=("Times New Roman", 20), wraplength=825,  command=self.action3)
                     self.button4.config(text=self.suggested_word_4, font=("Times New Roman", 20), wraplength=825,  command=self.action4)
 
-            self.panel5.config(text=self.self.current_sentence, font=("Times New Roman", 30), wraplength=1025)
+            self.panel5.config(text=self.current_sentence, font=("Times New Roman", 30), wraplength=1025)
         except Exception:
             print("==", traceback.format_exc())
         finally:
@@ -242,7 +251,7 @@ class SignLanguageApp:
         # - Resets word suggestions to empty strings.
         # - Clears the display panel for the current symbol and sentence.
 
-        self.self.current_sentence = " "
+        self.current_sentence = " "
         self.counter = 0
         self.current_word = " "
         self.current_character = "C"

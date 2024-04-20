@@ -58,6 +58,7 @@ class Application:
         print("Loaded model from disk")
 
         self.root = tk.Tk()
+        self.root.config(background='black')
         self.root.title("Multilingual SLR")
         self.root.protocol('WM_DELETE_WINDOW', self.destructor)
         self.root.geometry("1300x780")
@@ -217,13 +218,13 @@ class Application:
                     self.panel3.config(text=self.current_symbol, font=("Times New Roman", 30))
 
 
-                    # image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.dropdown.get()}/{self.current_symbol}.jpg"
-                    # image1 = Image.open(image_path)
-                    # image1 = image1.resize((200, 200), Image.LANCZOS)
-                    # test = ImageTk.PhotoImage(image1)
-                    # label1 = tk.Label(image=test)
-                    # label1.image = test
-                    # label1.place(x=1000, y=110)
+                    image_path = f"/Users/macbook/Downloads/American-sign-Language-main/Final Project/Source Code/Images/{self.dropdown.get()}/{self.current_symbol}.jpg"
+                    image1 = Image.open(image_path)
+                    image1 = image1.resize((200, 200), Image.LANCZOS)
+                    test = ImageTk.PhotoImage(image1)
+                    label1 = tk.Label(image=test)
+                    label1.image = test
+                    label1.place(x=1000, y=110)
 
 
 
